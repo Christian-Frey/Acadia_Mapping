@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Acadia_Mapping</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- //Strings related to the submit feedback feature -->
+    <string name="submit_feedback_button">Submit Feedback</string>
+    <string name="title_activity_submit_feedback">SubmitFeedback</string>
+    <string name="feedback_welcome">Thank you for submitting feedback on the feature.
+        Your feedback is greatly appreciated.</string>
+    <string name="positive_feedback_radio">I liked this feature!</string>
+    <string name="negative_feedback_radio">I didn\'t like this feature.</string>
+
+</resources>
