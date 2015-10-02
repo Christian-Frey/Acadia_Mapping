@@ -1,16 +1,23 @@
 package cfreyvermont.acadia_mapping;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 
 public class SubmitFeedback extends AppCompatActivity {
@@ -45,11 +52,9 @@ public class SubmitFeedback extends AppCompatActivity {
 
     public void submitData(View view) {
         //Grabbing the sent data
-        //Intent intent = getIntent();
-        //String btnText = intent.getStringExtra(MainActivity.BUTTON_TEXT);
+        Intent intent = getIntent();
+        String btnText = intent.getStringExtra(MainActivity.BUTTON_TEXT);
 
-
-        String feedback = "";
         String featureLiked = "";
         //Lets get the values of the selected radioButton
         RadioGroup rg = (RadioGroup) findViewById(R.id.feedback_radioGroup);
@@ -65,12 +70,12 @@ public class SubmitFeedback extends AppCompatActivity {
 
         //Grabbing the value of any typed feedback.
         EditText eText = (EditText) findViewById(R.id.feedbackText);
-        feedback = eText.getText().toString();
+        String feedback = eText.getText().toString();
 
         //Now we have all the data we want to submit.
         //Lets check the network connection.
         if (hasNetwork()) {
-            //send data
+            new UploadFeedbackTask().execute(btnText, feedback, featureLiked);
         }
         else {
             Toast.makeText(getApplicationContext(), "Network Error",
@@ -90,5 +95,57 @@ public class SubmitFeedback extends AppCompatActivity {
         }
         //No network connection, Stopping.
         return false;
+    }
+
+    private class UploadFeedbackTask extends AsyncTask<String, Integer, String> {
+        private final String FEEDBACK_SERVER = "http://10.0.2.2/android/insert.php";
+
+        @Override
+        protected void onPreExecute() {
+            //Toast.makeText(getApplicationContext(), "Made it!", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected String doInBackground(String... vars) {
+
+            try {
+                //Sends to a function designed to upload the data.
+                return uploadData(vars);
+            } catch (Exception e) {
+                return "Error Uploading Feedback";
+            }
+        }
+
+        @Override
+        //Lets the user know the feedback has been submitted.
+        protected void onPostExecute(String result) {
+            Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
+            SubmitFeedback.this.finish();
+        }
+        //uploads the data to the server specified at the top of the private class.
+        protected String uploadData(String[] vars) {
+            try {
+                String dataToEncode = "?btnText=" + vars[0] + "&isLiked=" + vars[2] +
+                        "&feedback=" + vars[1];
+
+                URL url = new URL(FEEDBACK_SERVER + dataToEncode);
+                Log.d("URL connection:", url.toString());
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.connect();
+
+                int responseCode = conn.getResponseCode();
+                Log.d("HTTP Response:", Integer.toString(responseCode));
+
+                //Making sure the server got our package correctly.
+                if (responseCode != 200) {
+                    Toast.makeText(getApplicationContext(), "Connection Error",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+            catch (IOException e) {
+                Log.e("I/O Exception: ", e.getMessage());
+            }
+            return "Feedback Submitted Successfully!";
+        }
     }
 }
