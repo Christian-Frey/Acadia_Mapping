@@ -4,13 +4,13 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
     public static final String BUTTON_TEXT =
             "com.cfreyvermont.acadia_mapping.BUTTON_TEXT";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,9 +19,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -29,31 +29,18 @@ public class MainActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        switch (item.getItemId()) {
+            case R.id.main_feedback_icon:
+                Intent intent = new Intent(this, SubmitFeedback.class);
+                //Adding the button submission location
+                String btnLocation = (String) item.getTitle();
+                intent.putExtra(BUTTON_TEXT, btnLocation);
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    //
-    //Name: SubmitFeedbackHandler
-    //Purpose: A function to pass information to create a new activity
-    //in order for the user to submit their feedback.
-    //
-
-    public void submitFeedbackHandler(View v) {
-        Intent intent = new Intent(this, SubmitFeedback.class);
-
-        //Adding in where the button was submitted in order to ID what feature
-        //was rated
-        Button b = (Button) findViewById(R.id.submit_feedback_icon);
-        String btnText = b.getHint().toString();
-        intent.putExtra(BUTTON_TEXT, btnText);
-
-        startActivity(intent);
     }
 }

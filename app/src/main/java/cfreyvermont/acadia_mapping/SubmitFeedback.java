@@ -18,6 +18,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 
 public class SubmitFeedback extends AppCompatActivity {
@@ -122,9 +123,11 @@ public class SubmitFeedback extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
             SubmitFeedback.this.finish();
         }
+
         //uploads the data to the server specified at the top of the private class.
         protected String uploadData(String[] vars) {
             try {
+                vars[0] = URLEncoder.encode(vars[0], "UTF-8");
                 String dataToEncode = "?btnText=" + vars[0] + "&isLiked=" + vars[2] +
                         "&feedback=" + vars[1];
 
