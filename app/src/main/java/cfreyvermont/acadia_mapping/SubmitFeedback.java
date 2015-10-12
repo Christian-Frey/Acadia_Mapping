@@ -84,7 +84,7 @@ public class SubmitFeedback extends AppCompatActivity {
         }
     }
 
-    public boolean hasNetwork() {
+    private boolean hasNetwork() {
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         //checks for the current state of the active network

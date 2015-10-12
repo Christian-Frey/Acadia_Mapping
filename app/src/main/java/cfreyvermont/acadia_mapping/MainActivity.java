@@ -3,9 +3,16 @@ package cfreyvermont.acadia_mapping;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+
 
 public class MainActivity extends AppCompatActivity {
     public static final String BUTTON_TEXT =
@@ -15,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        openMap(findViewById(R.id.openMap));
     }
 
     @Override
@@ -43,4 +51,32 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    public void openMap(View v) {
+        Intent intent = new Intent(this, MapsActivity.class);
+        boolean havePlay = havePlayService();
+
+        if (havePlay) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(getApplicationContext(), "Error with Play Services",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean havePlayService() {
+        GoogleApiAvailability google = GoogleApiAvailability.getInstance();
+        int result = google.isGooglePlayServicesAvailable(this);
+        if (result != ConnectionResult.SUCCESS) {
+            Log.e("Play Error:", google.getErrorString(result));
+            Log.e("Play Version:",
+                    Integer.toString(GoogleApiAvailability.GOOGLE_PLAY_SERVICES_VERSION_CODE));
+            return false;
+        }
+        return true;
+
+
+    }
+
+
 }
