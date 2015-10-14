@@ -9,7 +9,7 @@
         android:id="@+id/openMap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Go To Maps"
+        android:text="@string/open_map_button"
         android:onClick="openMap" />
 
 </RelativeLayout>

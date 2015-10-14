@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Acadia_Mapping</string>
-
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="activity_bar">Acadia Mapping</string>
 
@@ -14,5 +12,9 @@
     <string name="positive_feedback_radio">I liked this feature!</string>
     <string name="negative_feedback_radio">I didn\'t like this feature.</string>
     <string name="title_activity_maps">Map</string>
+    <string name="adtl_thoughts">Any additional thoughts?</string>
+
+    <!--Strings related to Maps -->
+    <string name="open_map_button">Go To Map</string>
 
 </resources>

@@ -44,7 +44,7 @@
         android:id="@+id/feedbackText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Any additional thoughts?"
+        android:hint="@string/adtl_thoughts"
         android:layout_below="@+id/feedback_radioGroup"
         android:layout_alignParentStart="true"
         android:layout_marginTop="30dp"

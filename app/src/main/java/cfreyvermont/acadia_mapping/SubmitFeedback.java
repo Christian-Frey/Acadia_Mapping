@@ -125,7 +125,7 @@ public class SubmitFeedback extends AppCompatActivity {
         }
 
         //uploads the data to the server specified at the top of the private class.
-        protected String uploadData(String[] vars) {
+        String uploadData(String[] vars) {
             try {
                 vars[0] = URLEncoder.encode(vars[0], "UTF-8");
                 String dataToEncode = "?btnText=" + vars[0] + "&isLiked=" + vars[2] +
@@ -143,6 +143,7 @@ public class SubmitFeedback extends AppCompatActivity {
                 if (responseCode != 200) {
                     Toast.makeText(getApplicationContext(), "Connection Error",
                             Toast.LENGTH_SHORT).show();
+                    return "Sending failed";
                 }
             }
             catch (IOException e) {
