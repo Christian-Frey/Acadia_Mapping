@@ -66,8 +66,147 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new LatLng(45.085540, -64.3642921),
                 new LatLng(45.085295, -64.364187));
 
+        PolygonOptions elliotHallOptions = new PolygonOptions().add(
+                new LatLng(45.090189, -64.369055),
+                new LatLng(45.090229, -64.368820),
+                new LatLng(45.089782, -64.368686),
+                new LatLng(45.089718, -64.369040),
+                new LatLng(45.089824, -64.369078),
+                new LatLng(45.089847, -64.368965));
+
+        PolygonOptions HSHOptions = new PolygonOptions().add(
+                new LatLng(45.089491, -64.369287),
+                new LatLng(45.089605, -64.368590),
+                new LatLng(45.089249, -64.368477),
+                new LatLng(45.089226, -64.368627),
+                new LatLng(45.089128, -64.368541),
+                new LatLng(45.089064, -64.368648),
+                new LatLng(45.089041, -64.368804),
+                new LatLng(45.089064, -64.368927),
+                new LatLng(45.089170, -64.368868),
+                new LatLng(45.089125, -64.369179));
+
+        PolygonOptions uClubOptions = new PolygonOptions().add(
+                new LatLng(45.089337, -64.369538),
+                new LatLng(45.089371, -64.369356),
+                new LatLng(45.089231, -64.369313),
+                new LatLng(45.089197, -64.369501));
+
+        PolygonOptions barraxOptions = new PolygonOptions().add(
+                new LatLng(45.088780, -64.369442),
+                new LatLng(45.088814, -64.369286),
+                new LatLng(45.088712, -64.369248),
+                new LatLng(45.088748, -64.369042),
+                new LatLng(45.088831, -64.369063),
+                new LatLng(45.088865, -64.368902),
+                new LatLng(45.088626, -64.368816),
+                new LatLng(45.088535, -64.369358));
+
+        PolygonOptions hortonHallOptions = new PolygonOptions().add(
+                new LatLng(45.089012, -64.368634),
+                new LatLng(45.089046, -64.368446),
+                new LatLng(45.088690, -64.368333),
+                new LatLng(45.088656, -64.368515));
+
+        PolygonOptions biologyOptions = new PolygonOptions().add(
+                new LatLng(45.088391, -64.369175),
+                new LatLng(45.088448, -64.368901),
+                new LatLng(45.088103, -64.368783),
+                new LatLng(45.088054, -64.369051));
+
+        PolygonOptions pattersonOptions = new PolygonOptions().add(
+                new LatLng(45.088527, -64.368606),
+                new LatLng(45.088588, -64.368252),
+                new LatLng(45.088187, -64.368118),
+                new LatLng(45.088149, -64.368327),
+                new LatLng(45.088403, -64.368424),
+                new LatLng(45.088384, -64.368553));
+
+        PolygonOptions kcicOptions = new PolygonOptions().add(
+                new LatLng(45.087480, -64.369085),
+                new LatLng(45.087696, -64.367924),
+                new LatLng(45.087298, -64.367801),
+                new LatLng(45.087268, -64.367983),
+                new LatLng(45.087514, -64.368058),
+                new LatLng(45.087397, -64.368793),
+                new LatLng(45.087348, -64.368782),
+                new LatLng(45.087303, -64.369023));
+
+        PolygonOptions uhallOptions = new PolygonOptions().add(
+                new LatLng(45.089235, -64.367396),
+                new LatLng(45.089337, -64.366691),
+                new LatLng(45.089095, -64.366621),
+                new LatLng(45.089065, -64.366857),
+                new LatLng(45.089012, -64.366846),
+                new LatLng(45.088974, -64.367039),
+                new LatLng(45.089027, -64.367066),
+                new LatLng(45.088989, -64.367318));
+
+        PolygonOptions rhodesHallOptions = new PolygonOptions().add(
+                new LatLng(45.088614, -64.367817),
+                new LatLng(45.088652, -64.367613),
+                new LatLng(45.088447, -64.367538),
+                new LatLng(45.088439, -64.367592),
+                new LatLng(45.088386, -64.367581),
+                new LatLng(45.088375, -64.367672),
+                new LatLng(45.088417, -64.367699),
+                new LatLng(45.088413, -64.367747));
+
+        PolygonOptions carnegieOptions = new PolygonOptions().add(
+                new LatLng(45.088264, -64.367545),
+                new LatLng(45.088321, -64.367153),
+                new LatLng(45.088101, -64.367083),
+                new LatLng(45.088090, -64.367147),
+                new LatLng(45.087935, -64.367109),
+                new LatLng(45.087886, -64.367366),
+                new LatLng(45.088060, -64.367420),
+                new LatLng(45.088056, -64.367474));
+
+        PolygonOptions emmersonOptions = new PolygonOptions().add(
+                new LatLng(45.088041, -64.366948),
+                new LatLng(45.088098, -64.366621),
+                new LatLng(45.087981, -64.366583),
+                new LatLng(45.087973, -64.366615),
+                new LatLng(45.087935, -64.366615),
+                new LatLng(45.087897, -64.366851),
+                new LatLng(45.087954, -64.366867),
+                new LatLng(45.087943, -64.366905));
+
+        PolygonOptions willetOptions = new PolygonOptions().add(
+                new LatLng(45.087682, -64.367232),
+                new LatLng(45.087712, -64.367066),
+                new LatLng(45.087458, -64.366975),
+                new LatLng(45.087431, -64.367136));
+
+        PolygonOptions fountainOptions = new PolygonOptions().add(
+                new LatLng(45.087859, -64.366423),
+                new LatLng(45.087961, -64.365849),
+                new LatLng(45.087802, -64.365795),
+                new LatLng(45.087783, -64.365897),
+                new LatLng(45.087703, -64.365870),
+                new LatLng(45.087658, -64.365908),
+                new LatLng(45.087613, -64.366187),
+                new LatLng(45.087640, -64.366241),
+                new LatLng(45.087723, -64.366273),
+                new LatLng(45.087715, -64.366359));
+
         buildingOptions.put("BAC", BACOptions);
         buildingOptions.put("Tower", towerOptions);
+        buildingOptions.put("Elliot", elliotHallOptions);
+        buildingOptions.put("HSH", HSHOptions);
+        buildingOptions.put("UniClub", uClubOptions);
+        buildingOptions.put("Barrax", barraxOptions);
+        buildingOptions.put("Horton", hortonHallOptions);
+        buildingOptions.put("Biology", biologyOptions);
+        buildingOptions.put("Patterson", pattersonOptions);
+        buildingOptions.put("KCIC", kcicOptions);
+        buildingOptions.put("UHall", uhallOptions);
+        buildingOptions.put("Rhodes", rhodesHallOptions);
+        buildingOptions.put("Carnegie", carnegieOptions);
+        buildingOptions.put("Emmerson", emmersonOptions);
+        buildingOptions.put("Willet", willetOptions);
+        buildingOptions.put("FountainCommons", fountainOptions);
+
         return buildingOptions;
     }
 
@@ -89,6 +228,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map.setIndoorEnabled(true);
         map.setBuildingsEnabled(true);
 
+        // TODO: Fix zooming in and out on startup
         /* Creating the points for our building outlines.
         We chose to use a map because it allows us to tie the set of points to a human
         readable name, will make it easier to identify each set of points. */
@@ -103,7 +243,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Polygon i = map.addPolygon(entry.getValue());
             polyList.add(i);
         }
-
 
         //Creating a new camera position with the correct bearing, since south is the
         //top of campus, we want the map "upside down"
