@@ -1,12 +1,15 @@
 package cfreyvermont.acadia_mapping;
 
-import android.support.v4.app.FragmentActivity;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -19,27 +22,69 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends Fragment {
+    private static GoogleMap map;
     //The boundary of our Map
-    LatLngBounds ACADIA = new LatLngBounds(new LatLng(45.081360, -64.37),
+    private static LatLngBounds ACADIA = new LatLngBounds(new LatLng(45.081360, -64.37),
             new LatLng(45.094025, -64.364259));
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        //No view
+        if (container == null) {
+            return null;
+        }
+        View view = inflater.inflate(R.layout.activity_maps, container, false);
+        setUpMapIfNeeded();
+        return view;
     }
 
+    //If the map is not up, we need to make one.
+    private void setUpMapIfNeeded() {
+        if (map == null) {
+            //It doesn't exist yet, lets make it
+            final MapFragment mapFragment = (MapFragment) getChildFragmentManager()
+                    .findFragmentById(R.id.map);
+            map = mapFragment.getMap();
+
+            if (map != null) {
+                buildMap();
+            }
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        if (map != null) {
+            buildMap();
+        }
+        if (map == null) {
+            final MapFragment mapFragment = (MapFragment) MainActivity
+                    .manager.findFragmentById(R.id.map);
+            map = mapFragment.getMap();
+            if (map != null) {
+                buildMap();
+            }
+        }
+    }
+
+  /*  @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (map != null) {
+            MainActivity.manager.beginTransaction()
+                    .remove(getChildFragmentManager().findFragmentById(R.id.map)).commit();
+            map = null;
+        }
+    }*/
+
     /**
-     * Creates a Map containing the outlining points and name of buildings at Acadia.
+     * Creates a Map data-type containing the outlining points and name of buildings at Acadia.
      *
-     * @return Map String building name, PolygonOptions points outlining the building.
+     * @return Map <String building name, PolygonOptions points outlining the building>.
      */
-    private Map<String, PolygonOptions> createPoints() {
+    private static Map<String, PolygonOptions> createPoints() {
         //We are using a LinkedHashMap to maintain order.
         Map<String, PolygonOptions> buildingOptions = new LinkedHashMap<>();
 
@@ -210,23 +255,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return buildingOptions;
     }
 
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
-    @Override
-    public void onMapReady(final GoogleMap map) {
+    public void buildMap() {
         //We want people to only be able to look at Acadia University, so
         //lets set boundaries on the maps position
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.setIndoorEnabled(true);
         map.setBuildingsEnabled(true);
+        map.getUiSettings().setRotateGesturesEnabled(true);
+        map.getUiSettings().setCompassEnabled(true);
+        map.getUiSettings().setTiltGesturesEnabled(false);
+        map.getUiSettings().setZoomControlsEnabled(true);
 
         // TODO: Fix zooming in and out on startup
         /* Creating the points for our building outlines.
@@ -267,7 +312,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (pos = 0; pos < polyList.size(); pos++) {
                     //Checking if they clicked on a building
                     if (PolyUtil.containsLocation(point, polyList.get(pos).getPoints(), false)) {
-                        //Create Building Info Window
+                        addFragment();
                     }
                 }
             }
@@ -316,5 +361,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+    }
+
+    public void addFragment() {
+        Fragment buildingInfo = new BuildingInfo();
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.add(R.id.building_info_placeholder, buildingInfo).commit();
     }
 }

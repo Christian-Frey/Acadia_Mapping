@@ -1,28 +1,31 @@
 package cfreyvermont.acadia_mapping;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
     public static final String BUTTON_TEXT =
             "com.cfreyvermont.acadia_mapping.BUTTON_TEXT";
+    public static FragmentManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        openMap(findViewById(R.id.openMap));
+
+        FragmentManager manager = getFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.add(R.id.map_placeholder, new MapsActivity());
+        transaction.commit();
     }
 
     @Override
@@ -52,19 +55,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void openMap(View v) {
-        Intent intent = new Intent(this, MapsActivity.class);
-        boolean havePlay = havePlayService();
-
-        if (havePlay) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(getApplicationContext(), "Error with Play Services",
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private boolean havePlayService() {
+    private boolean hasPlayService() {
         GoogleApiAvailability google = GoogleApiAvailability.getInstance();
         int result = google.isGooglePlayServicesAvailable(this);
         if (result != ConnectionResult.SUCCESS) {
@@ -74,9 +65,5 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
-
-
     }
-
-
 }
