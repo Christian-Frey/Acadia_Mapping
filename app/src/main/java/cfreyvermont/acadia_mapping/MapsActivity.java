@@ -35,47 +35,31 @@ public class MapsActivity extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+
     }
 
-
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //No view
-        if (container == null) {
-            return null;
-        }
-        View view = inflater.inflate(R.layout.activity_maps, container, false);
-        setUpMapIfNeeded(savedInstanceState);
-        return view;
-    }
+        return inflater.inflate(R.layout.activity_maps, container, false);
 
-    //If the map is not up, we need to make one.
-    private void setUpMapIfNeeded(Bundle savedInstanceState) {
-        if (map == null) {
-            //It doesn't exist yet, lets make it
-            final MapFragment mapFragment = (MapFragment) getChildFragmentManager()
-                    .findFragmentById(R.id.map);
-            map = mapFragment.getMap();
-
-            if (map != null) {
-                ACADIA = savedInstanceState.getParcelable("LatLngBounds");
-                buildMap();
-            }
-        }
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        if (map != null) {
-            buildMap();
-        }
-        if (map == null) {
-            final MapFragment mapFragment = (MapFragment) MainActivity
-                    .manager.findFragmentById(R.id.map);
+        if (savedInstanceState != null) {
+            ACADIA = savedInstanceState.getParcelable("LatLngBounds");
+            mapOptions = savedInstanceState.getParcelable("mapOptions");
+            CameraPosition position = savedInstanceState.getParcelable("LatLng");
+            MapFragment mFragment = MapFragment.newInstance(mapOptions);
+            map = mFragment.getMap();
+            map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+        } else {
+            final MapFragment mapFragment = (MapFragment) getChildFragmentManager()
+                    .findFragmentById(R.id.map);
             map = mapFragment.getMap();
-            if (map != null) {
-                buildMap();
-            }
+            buildMap();
         }
     }
 
@@ -297,7 +281,7 @@ public class MapsActivity extends Fragment {
                 .bearing(165)
                 .zoom(17)
                 .build();
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
         /*
@@ -314,8 +298,7 @@ public class MapsActivity extends Fragment {
                     if (PolyUtil.containsLocation(point, polyList.get(pos).getPoints(), false)) {
                         Set<String> keySet = buildingOptions.keySet();
                         Object keyArray[] = keySet.toArray();
-                        String array[] = (String[]) keyArray;
-                        addFragment(array[pos]);
+                        addFragment(keyArray[pos].toString());
                     }
                 }
             }
@@ -368,12 +351,14 @@ public class MapsActivity extends Fragment {
 
     public void addFragment(String bldName) {
         Fragment buildingInfo = new BuildingInfo();
+
         Bundle bundle = new Bundle();
         bundle.putString("buildingName", bldName);
         buildingInfo.setArguments(bundle);
+
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        transaction.addToBackStack(null);
-        transaction.add(R.id.building_info_placeholder, buildingInfo).commit();
+        transaction.add(R.id.building_info_placeholder, buildingInfo)
+                .addToBackStack(null).commit();
     }
 
     @Override
@@ -381,5 +366,6 @@ public class MapsActivity extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putParcelable("LatLngBounds", ACADIA);
         outState.putParcelable("mapOptions", mapOptions);
+        outState.putParcelable("LatLng", map.getCameraPosition());
     }
 }

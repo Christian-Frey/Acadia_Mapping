@@ -16,16 +16,20 @@ public class MainActivity extends FragmentActivity {
     public static final String BUTTON_TEXT =
             "com.cfreyvermont.acadia_mapping.BUTTON_TEXT";
     public static FragmentManager manager;
+    public MapsActivity mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentManager manager = getFragmentManager();
+        manager = getFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(R.id.map_placeholder, new MapsActivity());
-        transaction.commit();
+        if (hasPlayService()) {
+            mapFragment = new MapsActivity();
+            transaction.add(R.id.map_placeholder, mapFragment);
+            transaction.commit();
+        }
     }
 
     @Override
@@ -55,6 +59,48 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.d("MainActivity:", "onSaveInstanceState");
+        FragmentManager manager = getFragmentManager();
+        manager.putFragment(outState, "mapFragmentSaved", mapFragment);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle inState) {
+        Log.d("MainActivity:", "onRestoreInstanceState");
+        Log.d("Bundle is", Boolean.toString(inState.isEmpty()));
+        rebuildFragments(inState);
+    }
+
+    @Override
+    public void onBackPressed() {
+        //getBackStackEntryCount seemingly ignores the fact that a fragment
+        //has child fragments in the back stack. So we need to check the
+        //childBackStack manually.
+        if (mapFragment != null &&
+                mapFragment.getChildFragmentManager().getBackStackEntryCount() > 0) {
+            mapFragment.getChildFragmentManager().popBackStack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public void rebuildFragments(Bundle inState) {
+        FragmentManager manager = getFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+
+        //We saved the fragment (most likely on rotation)
+        if (inState != null) {
+            mapFragment = (MapsActivity) manager.getFragment(inState,
+                    "mapFragmentSaved");
+
+        } else {
+            mapFragment = new MapsActivity();
+            transaction.add(R.id.map_placeholder, mapFragment);
+            transaction.commit();
+        }
+    }
     private boolean hasPlayService() {
         GoogleApiAvailability google = GoogleApiAvailability.getInstance();
         int result = google.isGooglePlayServicesAvailable(this);
