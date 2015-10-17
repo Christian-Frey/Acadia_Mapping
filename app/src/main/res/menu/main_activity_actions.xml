@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:acadiaMapping="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:title="@string/activity_bar">
+
+    <item android:title="@string/title_activity_submit_feedback"
+          android:id="@+id/main_feedback_icon"
+          android:icon="@drawable/ic_feedback_white_24dp"
+          acadiaMapping:showAsAction="ifRoom|withText"
+          tools:ignore="MenuTitle" />
+</menu>
