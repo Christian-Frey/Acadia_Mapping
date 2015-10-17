@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -21,14 +22,22 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MapsActivity extends Fragment {
-    private static GoogleMap map;
-    //The boundary of our Map
-    private static LatLngBounds ACADIA = new LatLngBounds(new LatLng(45.081360, -64.37),
+    GoogleMap map;
+    LatLngBounds ACADIA = new LatLngBounds(new LatLng(45.081360, -64.37),
             new LatLng(45.094025, -64.364259));
+    GoogleMapOptions mapOptions;
+    List<Polygon> polyList = new ArrayList<>();
+    Map<String, PolygonOptions> buildingOptions;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         //No view
@@ -36,12 +45,12 @@ public class MapsActivity extends Fragment {
             return null;
         }
         View view = inflater.inflate(R.layout.activity_maps, container, false);
-        setUpMapIfNeeded();
+        setUpMapIfNeeded(savedInstanceState);
         return view;
     }
 
     //If the map is not up, we need to make one.
-    private void setUpMapIfNeeded() {
+    private void setUpMapIfNeeded(Bundle savedInstanceState) {
         if (map == null) {
             //It doesn't exist yet, lets make it
             final MapFragment mapFragment = (MapFragment) getChildFragmentManager()
@@ -49,6 +58,7 @@ public class MapsActivity extends Fragment {
             map = mapFragment.getMap();
 
             if (map != null) {
+                ACADIA = savedInstanceState.getParcelable("LatLngBounds");
                 buildMap();
             }
         }
@@ -68,16 +78,6 @@ public class MapsActivity extends Fragment {
             }
         }
     }
-
-  /*  @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (map != null) {
-            MainActivity.manager.beginTransaction()
-                    .remove(getChildFragmentManager().findFragmentById(R.id.map)).commit();
-            map = null;
-        }
-    }*/
 
     /**
      * Creates a Map data-type containing the outlining points and name of buildings at Acadia.
@@ -272,13 +272,13 @@ public class MapsActivity extends Fragment {
         map.getUiSettings().setCompassEnabled(true);
         map.getUiSettings().setTiltGesturesEnabled(false);
         map.getUiSettings().setZoomControlsEnabled(true);
+        map.setBuildingsEnabled(false);
 
         // TODO: Fix zooming in and out on startup
         /* Creating the points for our building outlines.
         We chose to use a map because it allows us to tie the set of points to a human
         readable name, will make it easier to identify each set of points. */
-        final Map<String, PolygonOptions> buildingOptions = createPoints();
-        final List<Polygon> polyList = new ArrayList<>();
+        buildingOptions = createPoints();
 
        /*
         * Iterates through the map to add the building outlines. Adds the polygons to
@@ -312,7 +312,10 @@ public class MapsActivity extends Fragment {
                 for (pos = 0; pos < polyList.size(); pos++) {
                     //Checking if they clicked on a building
                     if (PolyUtil.containsLocation(point, polyList.get(pos).getPoints(), false)) {
-                        addFragment();
+                        Set<String> keySet = buildingOptions.keySet();
+                        Object keyArray[] = keySet.toArray();
+                        String array[] = (String[]) keyArray;
+                        addFragment(array[pos]);
                     }
                 }
             }
@@ -363,9 +366,20 @@ public class MapsActivity extends Fragment {
         });
     }
 
-    public void addFragment() {
+    public void addFragment(String bldName) {
         Fragment buildingInfo = new BuildingInfo();
+        Bundle bundle = new Bundle();
+        bundle.putString("buildingName", bldName);
+        buildingInfo.setArguments(bundle);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.addToBackStack(null);
         transaction.add(R.id.building_info_placeholder, buildingInfo).commit();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("LatLngBounds", ACADIA);
+        outState.putParcelable("mapOptions", mapOptions);
     }
 }
