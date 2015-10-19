@@ -61,16 +61,30 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        Log.d("MainActivity:", "onSaveInstanceState");
         FragmentManager manager = getFragmentManager();
         manager.putFragment(outState, "mapFragmentSaved", mapFragment);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle inState) {
-        Log.d("MainActivity:", "onRestoreInstanceState");
-        Log.d("Bundle is", Boolean.toString(inState.isEmpty()));
         rebuildFragments(inState);
+    }
+
+    public void rebuildFragments(Bundle inState) {
+        FragmentManager manager = getFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+
+        //We saved the fragment (most likely on rotation)
+        if (inState != null) {
+            mapFragment = (MapsActivity) manager.getFragment(inState,
+                    "mapFragmentSaved");
+
+        } else {
+            mapFragment = new MapsActivity();
+            transaction.add(R.id.map_placeholder, mapFragment);
+            transaction.addToBackStack("MapsFragment");
+            transaction.commit();
+        }
     }
 
     @Override
@@ -86,21 +100,6 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    public void rebuildFragments(Bundle inState) {
-        FragmentManager manager = getFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-
-        //We saved the fragment (most likely on rotation)
-        if (inState != null) {
-            mapFragment = (MapsActivity) manager.getFragment(inState,
-                    "mapFragmentSaved");
-
-        } else {
-            mapFragment = new MapsActivity();
-            transaction.add(R.id.map_placeholder, mapFragment);
-            transaction.commit();
-        }
-    }
     private boolean hasPlayService() {
         GoogleApiAvailability google = GoogleApiAvailability.getInstance();
         int result = google.isGooglePlayServicesAvailable(this);

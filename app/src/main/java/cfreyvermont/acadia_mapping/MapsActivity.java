@@ -3,6 +3,7 @@ package cfreyvermont.acadia_mapping;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,17 +50,30 @@ public class MapsActivity extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         if (savedInstanceState != null) {
-            ACADIA = savedInstanceState.getParcelable("LatLngBounds");
-            mapOptions = savedInstanceState.getParcelable("mapOptions");
-            CameraPosition position = savedInstanceState.getParcelable("LatLng");
-            MapFragment mFragment = MapFragment.newInstance(mapOptions);
-            map = mFragment.getMap();
-            map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+            restoreData(savedInstanceState);
         } else {
             final MapFragment mapFragment = (MapFragment) getChildFragmentManager()
                     .findFragmentById(R.id.map);
             map = mapFragment.getMap();
             buildMap();
+        }
+    }
+
+    private void restoreData(Bundle savedInstanceState) {
+        //Restoring saved Data
+        ACADIA = savedInstanceState.getParcelable("LatLngBounds");
+        mapOptions = savedInstanceState.getParcelable("mapOptions");
+        CameraPosition position = savedInstanceState.getParcelable("LatLng");
+        if (position != null) {
+            Log.d("Camera Lat", Double.toString(position.target.latitude));
+            Log.d("Camera Lon", Double.toString(position.target.longitude));
+        }
+        MapFragment mFragment = MapFragment.newInstance(mapOptions);
+        map = mFragment.getMap();
+        map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+
+        if (savedInstanceState.getBoolean("hasBuildingOpen")) {
+            Log.d("BuildingInfo:", "Open");
         }
     }
 
@@ -284,6 +298,7 @@ public class MapsActivity extends Fragment {
         map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
+
         /*
          * Below are callback functions for Map clicks and camera changes
          */
@@ -299,6 +314,10 @@ public class MapsActivity extends Fragment {
                         Set<String> keySet = buildingOptions.keySet();
                         Object keyArray[] = keySet.toArray();
                         addFragment(keyArray[pos].toString());
+                    } else {
+                        /*They didn't click on a building. If an info window is
+                        open, lets close it. Thanks to a friend for pointing this out */
+                        removeFragment();
                     }
                 }
             }
@@ -356,11 +375,21 @@ public class MapsActivity extends Fragment {
         bundle.putString("buildingName", bldName);
         buildingInfo.setArguments(bundle);
 
+        //We don't want more than one window open at a time, so remove all current fragments.
+        removeFragment();
+
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        transaction.add(R.id.building_info_placeholder, buildingInfo)
-                .addToBackStack(null).commit();
+        transaction.replace(R.id.building_info_placeholder, buildingInfo)
+                .addToBackStack("BuildingInfo").commit();
     }
 
+    private void removeFragment() {
+        if (getChildFragmentManager().getBackStackEntryCount() > 0) {
+            //We already have a window open. Lets close it, then open a new one with the
+            //new building.
+            getChildFragmentManager().popBackStack();
+        }
+    }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
