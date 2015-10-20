@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -51,7 +50,7 @@ public class SubmitFeedback extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void submitData(View view) {
+    public void submitData() {
         //Grabbing the sent data
         Intent intent = getIntent();
         String btnText = intent.getStringExtra(MainActivity.BUTTON_TEXT);

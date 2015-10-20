@@ -5,7 +5,6 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,15 +14,14 @@ import com.google.android.gms.common.GoogleApiAvailability;
 public class MainActivity extends FragmentActivity {
     public static final String BUTTON_TEXT =
             "com.cfreyvermont.acadia_mapping.BUTTON_TEXT";
-    public static FragmentManager manager;
-    public MapsActivity mapFragment;
+    private MapsActivity mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        manager = getFragmentManager();
+        FragmentManager manager = getFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         if (hasPlayService()) {
             mapFragment = new MapsActivity();
@@ -60,34 +58,6 @@ public class MainActivity extends FragmentActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        FragmentManager manager = getFragmentManager();
-        manager.putFragment(outState, "mapFragmentSaved", mapFragment);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle inState) {
-        rebuildFragments(inState);
-    }
-
-    public void rebuildFragments(Bundle inState) {
-        FragmentManager manager = getFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-
-        //We saved the fragment (most likely on rotation)
-        if (inState != null) {
-            mapFragment = (MapsActivity) manager.getFragment(inState,
-                    "mapFragmentSaved");
-
-        } else {
-            mapFragment = new MapsActivity();
-            transaction.add(R.id.map_placeholder, mapFragment);
-            transaction.addToBackStack("MapsFragment");
-            transaction.commit();
-        }
-    }
-
-    @Override
     public void onBackPressed() {
         //getBackStackEntryCount seemingly ignores the fact that a fragment
         //has child fragments in the back stack. So we need to check the
@@ -103,12 +73,6 @@ public class MainActivity extends FragmentActivity {
     private boolean hasPlayService() {
         GoogleApiAvailability google = GoogleApiAvailability.getInstance();
         int result = google.isGooglePlayServicesAvailable(this);
-        if (result != ConnectionResult.SUCCESS) {
-            Log.e("Play Error:", google.getErrorString(result));
-            Log.e("Play Version:",
-                    Integer.toString(GoogleApiAvailability.GOOGLE_PLAY_SERVICES_VERSION_CODE));
-            return false;
-        }
-        return true;
+        return result == ConnectionResult.SUCCESS;
     }
 }

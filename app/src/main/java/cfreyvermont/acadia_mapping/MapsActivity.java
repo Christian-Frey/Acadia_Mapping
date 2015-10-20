@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -25,19 +24,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+//TODO add a search bar to find buildings.
+
 public class MapsActivity extends Fragment {
-    GoogleMap map;
-    LatLngBounds ACADIA = new LatLngBounds(new LatLng(45.081360, -64.37),
+    private GoogleMap map;
+    private final LatLngBounds ACADIA = new LatLngBounds(new LatLng(45.081360, -64.37),
             new LatLng(45.094025, -64.364259));
-    GoogleMapOptions mapOptions;
-    List<Polygon> polyList = new ArrayList<>();
-    Map<String, PolygonOptions> buildingOptions;
+    private Boolean BUILDING_WINDOW_OPEN = false;
+    private String BUILDING_NAME_WINDOW_OPEN;
+    private final List<Polygon> polyList = new ArrayList<>();
+    private Map<String, PolygonOptions> buildingOptions;
+    private LatLng cameraPositionSaved;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-
+        if (savedInstanceState != null) {
+            cameraPositionSaved = savedInstanceState.getParcelable("LatLng");
+            BUILDING_WINDOW_OPEN = savedInstanceState.getBoolean("hasInfoOpen");
+            Log.i("Building Open:", BUILDING_WINDOW_OPEN.toString());
+            if (BUILDING_WINDOW_OPEN) {
+                BUILDING_NAME_WINDOW_OPEN = savedInstanceState.getString("BuildingName");
+            }
+        }
     }
 
     @Override
@@ -49,31 +58,11 @@ public class MapsActivity extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            restoreData(savedInstanceState);
-        } else {
-            final MapFragment mapFragment = (MapFragment) getChildFragmentManager()
-                    .findFragmentById(R.id.map);
-            map = mapFragment.getMap();
-            buildMap();
-        }
-    }
-
-    private void restoreData(Bundle savedInstanceState) {
-        //Restoring saved Data
-        ACADIA = savedInstanceState.getParcelable("LatLngBounds");
-        mapOptions = savedInstanceState.getParcelable("mapOptions");
-        CameraPosition position = savedInstanceState.getParcelable("LatLng");
-        if (position != null) {
-            Log.d("Camera Lat", Double.toString(position.target.latitude));
-            Log.d("Camera Lon", Double.toString(position.target.longitude));
-        }
-        MapFragment mFragment = MapFragment.newInstance(mapOptions);
-        map = mFragment.getMap();
-        map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
-
-        if (savedInstanceState.getBoolean("hasBuildingOpen")) {
-            Log.d("BuildingInfo:", "Open");
+        MapFragment mapFragment = (MapFragment) getChildFragmentManager()
+                .findFragmentById(R.id.map);
+        map = mapFragment.getMap();
+        if (map != null) {
+            onMapReady();
         }
     }
 
@@ -260,9 +249,24 @@ public class MapsActivity extends Fragment {
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
-    public void buildMap() {
+    private void onMapReady() {
+        LatLng target = new LatLng(45.088845, -64.366850);
+        //Creating a new camera position with the correct bearing, since south is the
+        //top of campus, we want the map "upside down"
+        if (cameraPositionSaved != null) {
+            target = cameraPositionSaved;
+        }
+        final CameraPosition cameraPosition = new CameraPosition.Builder()
+                //Centering on University hall to start
+                .target(target)
+                .bearing(165)
+                .zoom(17)
+                .build();
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
         //We want people to only be able to look at Acadia University, so
         //lets set boundaries on the maps position
+
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.setIndoorEnabled(true);
         map.setBuildingsEnabled(true);
@@ -272,7 +276,6 @@ public class MapsActivity extends Fragment {
         map.getUiSettings().setZoomControlsEnabled(true);
         map.setBuildingsEnabled(false);
 
-        // TODO: Fix zooming in and out on startup
         /* Creating the points for our building outlines.
         We chose to use a map because it allows us to tie the set of points to a human
         readable name, will make it easier to identify each set of points. */
@@ -287,16 +290,10 @@ public class MapsActivity extends Fragment {
             polyList.add(i);
         }
 
-        //Creating a new camera position with the correct bearing, since south is the
-        //top of campus, we want the map "upside down"
-        final CameraPosition cameraPosition = new CameraPosition.Builder()
-                //Centering on University hall to start
-                .target(new LatLng(45.088845, 64.366850))
-                .bearing(165)
-                .zoom(17)
-                .build();
-        map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
+        if (BUILDING_WINDOW_OPEN) {
+            Log.i("Adding Fragment for", BUILDING_NAME_WINDOW_OPEN);
+            addFragment(BUILDING_NAME_WINDOW_OPEN);
+        }
 
 
         /*
@@ -311,21 +308,25 @@ public class MapsActivity extends Fragment {
                 for (pos = 0; pos < polyList.size(); pos++) {
                     //Checking if they clicked on a building
                     if (PolyUtil.containsLocation(point, polyList.get(pos).getPoints(), false)) {
+                        //Checking if a building is open right now...
+                        if (BUILDING_WINDOW_OPEN) {
+                            removeFragment();
+                        }
                         Set<String> keySet = buildingOptions.keySet();
                         Object keyArray[] = keySet.toArray();
-                        addFragment(keyArray[pos].toString());
-                    } else {
-                        /*They didn't click on a building. If an info window is
-                        open, lets close it. Thanks to a friend for pointing this out */
-                        removeFragment();
+                        BUILDING_NAME_WINDOW_OPEN = keyArray[pos].toString();
+                        addFragment(BUILDING_NAME_WINDOW_OPEN);
+                        return;
                     }
                 }
+                //Didn't tap on any building, so lets remove the current fragment,
+                //if there is one.
+                removeFragment();
             }
         });
 
         //Letting the map know what to do when it updates
         map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-
             /* We want to be able to restrict the user from leaving Acadia, so lets
              * (gently) let them know that they can not leave the area by snapping back
              * to the closest edge if they stray too far.
@@ -333,8 +334,17 @@ public class MapsActivity extends Fragment {
              * is updated, even if it is moved by the program. Not ideal, but should be
              * acceptable for our uses.
             */
+
+            private final int LAST_CALLED_THRESHOLD_MS = 250;
+            private long lastCalled = Long.MIN_VALUE;
+
             @Override
             public void onCameraChange(CameraPosition position) {
+                //This attempts to prevent camera action when the camera is moving.
+                final long currentTime = System.currentTimeMillis();
+                if (lastCalled + LAST_CALLED_THRESHOLD_MS > currentTime) {
+                    return;
+                }
                 LatLng center = position.target;
                 LatLng closeEdge = ACADIA.getCenter();
 
@@ -364,11 +374,20 @@ public class MapsActivity extends Fragment {
                             .build();
                     map.animateCamera(CameraUpdateFactory.newCameraPosition(goingTo));
                 }
+                lastCalled = currentTime;
             }
+
         });
     }
 
-    public void addFragment(String bldName) {
+    /**
+     * This function will add a fragment to the map activity, providing information about
+     * the building that the user tapped on.
+     *
+     * @param bldName The name of the building that the fragment will be created about.
+     */
+    private void addFragment(String bldName) {
+        BUILDING_WINDOW_OPEN = true;
         Fragment buildingInfo = new BuildingInfo();
 
         Bundle bundle = new Bundle();
@@ -376,25 +395,32 @@ public class MapsActivity extends Fragment {
         buildingInfo.setArguments(bundle);
 
         //We don't want more than one window open at a time, so remove all current fragments.
-        removeFragment();
-
+        //removeFragment();
+        Log.i("Opening:", BUILDING_NAME_WINDOW_OPEN);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        transaction.replace(R.id.building_info_placeholder, buildingInfo)
-                .addToBackStack("BuildingInfo").commit();
+        transaction.replace(R.id.building_info_placeholder, buildingInfo);
+        transaction.addToBackStack("BuildingInfo").commit();
     }
 
+    /**
+     * This function removes the fragment that is currently on top of the map.
+     */
     private void removeFragment() {
         if (getChildFragmentManager().getBackStackEntryCount() > 0) {
             //We already have a window open. Lets close it, then open a new one with the
             //new building.
             getChildFragmentManager().popBackStack();
         }
+        Log.i("Removing:", BUILDING_NAME_WINDOW_OPEN);
+        BUILDING_WINDOW_OPEN = false;
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable("LatLngBounds", ACADIA);
-        outState.putParcelable("mapOptions", mapOptions);
-        outState.putParcelable("LatLng", map.getCameraPosition());
+        outState.putParcelable("LatLng", map.getCameraPosition().target);
+        outState.putBoolean("hasInfoOpen", (getChildFragmentManager().getBackStackEntryCount() > 0));
+        if (getChildFragmentManager().getBackStackEntryCount() > 0) {
+            outState.putString("BuildingName", BUILDING_NAME_WINDOW_OPEN);
+        }
     }
 }
