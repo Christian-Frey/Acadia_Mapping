@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 //TODO add a search bar to find buildings.
 
@@ -262,12 +261,12 @@ public class MapsActivity extends Fragment {
                 .bearing(165)
                 .zoom(17)
                 .build();
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
         //We want people to only be able to look at Acadia University, so
         //lets set boundaries on the maps position
 
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
         map.setIndoorEnabled(true);
         map.setBuildingsEnabled(true);
         map.getUiSettings().setRotateGesturesEnabled(true);
@@ -291,10 +290,9 @@ public class MapsActivity extends Fragment {
         }
 
         if (BUILDING_WINDOW_OPEN) {
-            Log.i("Adding Fragment for", BUILDING_NAME_WINDOW_OPEN);
+            Log.i("Opening From Saved:", BUILDING_NAME_WINDOW_OPEN);
             addFragment(BUILDING_NAME_WINDOW_OPEN);
         }
-
 
         /*
          * Below are callback functions for Map clicks and camera changes
@@ -304,16 +302,14 @@ public class MapsActivity extends Fragment {
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
-                int pos;
-                for (pos = 0; pos < polyList.size(); pos++) {
+                for (int pos = 0; pos < polyList.size(); pos++) {
                     //Checking if they clicked on a building
                     if (PolyUtil.containsLocation(point, polyList.get(pos).getPoints(), false)) {
                         //Checking if a building is open right now...
                         if (BUILDING_WINDOW_OPEN) {
                             removeFragment();
                         }
-                        Set<String> keySet = buildingOptions.keySet();
-                        Object keyArray[] = keySet.toArray();
+                        Object keyArray[] = buildingOptions.keySet().toArray();
                         BUILDING_NAME_WINDOW_OPEN = keyArray[pos].toString();
                         addFragment(BUILDING_NAME_WINDOW_OPEN);
                         return;
@@ -407,12 +403,11 @@ public class MapsActivity extends Fragment {
      */
     private void removeFragment() {
         if (getChildFragmentManager().getBackStackEntryCount() > 0) {
-            //We already have a window open. Lets close it, then open a new one with the
-            //new building.
             getChildFragmentManager().popBackStack();
+            Log.i("Removing:", BUILDING_NAME_WINDOW_OPEN);
+            BUILDING_WINDOW_OPEN = false;
         }
-        Log.i("Removing:", BUILDING_NAME_WINDOW_OPEN);
-        BUILDING_WINDOW_OPEN = false;
+
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -422,5 +417,6 @@ public class MapsActivity extends Fragment {
         if (getChildFragmentManager().getBackStackEntryCount() > 0) {
             outState.putString("BuildingName", BUILDING_NAME_WINDOW_OPEN);
         }
+        Log.i("onSaveInstanceState:", "All saved, goodbye.");
     }
 }

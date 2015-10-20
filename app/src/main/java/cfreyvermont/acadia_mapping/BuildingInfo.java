@@ -1,58 +1,28 @@
 package cfreyvermont.acadia_mapping;
 
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link BuildingInfo#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BuildingInfo extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_BUILDINGNAME = "Name";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_BUILDINGNAME = "buildingName";
 
     // TODO: Rename and change types of parameters
     private String buildingName;
-    private String mParam2;
-
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment BuildingInfo.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static BuildingInfo newInstance(String param1, String param2) {
-        BuildingInfo fragment = new BuildingInfo();
-        Bundle args = new Bundle();
-        args.putString(ARG_BUILDINGNAME, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public BuildingInfo() {
-        // Required empty public constructor
-    }
+    Bundle bundle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            buildingName = getArguments().getString(ARG_BUILDINGNAME);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        bundle = getArguments();
     }
 
     @Override
@@ -60,5 +30,21 @@ public class BuildingInfo extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_building_info, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        ImageView i = (ImageView) getView().findViewById(R.id.imageInfo);
+        if (bundle != null) {
+            Log.i("BuildingInfo->onCreate:", "have saved data");
+            buildingName = bundle.getString(ARG_BUILDINGNAME);
+            //mParam2 = getArguments().getString(ARG_PARAM2);
+            Log.i("BUILDINGNAME:", buildingName);
+            if (buildingName.equals("KCIC")) {
+                Log.i("onCreate,BuildingInfo:", "Checked for KCIC");
+                Drawable d = getResources().getDrawable(R.drawable.kcic);
+                i.setImageDrawable(d);
+            }
+        }
     }
 }
