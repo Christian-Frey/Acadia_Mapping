@@ -7,6 +7,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,7 +21,6 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.maps.android.PolyUtil;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,7 @@ public class MapsActivity extends Fragment {
             new LatLng(45.094025, -64.364259));
     private Boolean BUILDING_WINDOW_OPEN = false;
     private String BUILDING_NAME_WINDOW_OPEN;
-    private final List<Polygon> polyList = new ArrayList<>();
+    private final Map<String, Polygon> polyList = new LinkedHashMap<>();
     private Map<String, PolygonOptions> buildingOptions;
     private LatLng cameraPositionSaved;
 
@@ -52,7 +54,6 @@ public class MapsActivity extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_maps, container, false);
-
     }
 
     @Override
@@ -60,6 +61,46 @@ public class MapsActivity extends Fragment {
         MapFragment mapFragment = (MapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
         map = mapFragment.getMap();
+
+        AutoCompleteTextView textView = (AutoCompleteTextView) getActivity()
+                .findViewById(R.id.BuildingSearch);
+        final String[] buildings = getResources().getStringArray(R.array.building_names);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_list_item_1, buildings);
+
+        textView.setAdapter(adapter);
+        Log.d("Adapter Set on TextView", "");
+        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                /* The id is the location in the array that was shown when the user clicked
+                   on the item. This is NOT the location of the item clicked in the the
+                   whole array. So we need to search for the item that was clicked on, in order
+                   to get the proper index to get the right building name.
+
+                   With such a small amount of items to search (<50), I'll just use a simple
+                   linear search for now.
+                 */
+                String buildingWanted = adapter.getItem(position);
+                String buildingCode = buildingWanted.substring(buildingWanted.length() - 3);
+
+
+                if (map != null) {
+                    PolygonOptions bldOption = buildingOptions.get(buildingCode);
+                    List<LatLng> points = bldOption.getPoints();
+
+
+                    //Moving to building that was selected
+                    CameraPosition cp = new CameraPosition.Builder()
+                            .target(points.get(0))
+                            .zoom(map.getCameraPosition().zoom)
+                            .bearing(map.getCameraPosition().bearing)
+                            .build();
+                    map.animateCamera(CameraUpdateFactory.newCameraPosition(cp));
+                }
+            }
+        });
+
         if (map != null) {
             onMapReady();
         }
@@ -91,19 +132,63 @@ public class MapsActivity extends Fragment {
                 new LatLng(45.090248, -64.364891),
                 new LatLng(45.090062, -64.365556));
 
-        PolygonOptions towerOptions = new PolygonOptions().add(
+        PolygonOptions BIOOptions = new PolygonOptions().add(
+                new LatLng(45.088391, -64.369175),
+                new LatLng(45.088448, -64.368901),
+                new LatLng(45.088103, -64.368783),
+                new LatLng(45.088054, -64.369051));
+
+        PolygonOptions CAROptions = new PolygonOptions().add(
+                new LatLng(45.088264, -64.367545),
+                new LatLng(45.088321, -64.367153),
+                new LatLng(45.088101, -64.367083),
+                new LatLng(45.088090, -64.367147),
+                new LatLng(45.087935, -64.367109),
+                new LatLng(45.087886, -64.367366),
+                new LatLng(45.088060, -64.367420),
+                new LatLng(45.088056, -64.367474));
+
+        PolygonOptions CROOptions = new PolygonOptions().add(
                 new LatLng(45.085245, -64.364424),
                 new LatLng(45.085485, -64.364519),
                 new LatLng(45.085540, -64.3642921),
                 new LatLng(45.085295, -64.364187));
 
-        PolygonOptions elliotHallOptions = new PolygonOptions().add(
+        PolygonOptions ELLOptions = new PolygonOptions().add(
                 new LatLng(45.090189, -64.369055),
                 new LatLng(45.090229, -64.368820),
                 new LatLng(45.089782, -64.368686),
                 new LatLng(45.089718, -64.369040),
                 new LatLng(45.089824, -64.369078),
                 new LatLng(45.089847, -64.368965));
+
+        PolygonOptions EMMOptions = new PolygonOptions().add(
+                new LatLng(45.088041, -64.366948),
+                new LatLng(45.088098, -64.366621),
+                new LatLng(45.087981, -64.366583),
+                new LatLng(45.087973, -64.366615),
+                new LatLng(45.087935, -64.366615),
+                new LatLng(45.087897, -64.366851),
+                new LatLng(45.087954, -64.366867),
+                new LatLng(45.087943, -64.366905));
+
+        PolygonOptions FOUOptions = new PolygonOptions().add(
+                new LatLng(45.087859, -64.366423),
+                new LatLng(45.087961, -64.365849),
+                new LatLng(45.087802, -64.365795),
+                new LatLng(45.087783, -64.365897),
+                new LatLng(45.087703, -64.365870),
+                new LatLng(45.087658, -64.365908),
+                new LatLng(45.087613, -64.366187),
+                new LatLng(45.087640, -64.366241),
+                new LatLng(45.087723, -64.366273),
+                new LatLng(45.087715, -64.366359));
+
+        PolygonOptions HOROptions = new PolygonOptions().add(
+                new LatLng(45.089012, -64.368634),
+                new LatLng(45.089046, -64.368446),
+                new LatLng(45.088690, -64.368333),
+                new LatLng(45.088656, -64.368515));
 
         PolygonOptions HSHOptions = new PolygonOptions().add(
                 new LatLng(45.089491, -64.369287),
@@ -117,43 +202,7 @@ public class MapsActivity extends Fragment {
                 new LatLng(45.089170, -64.368868),
                 new LatLng(45.089125, -64.369179));
 
-        PolygonOptions uClubOptions = new PolygonOptions().add(
-                new LatLng(45.089337, -64.369538),
-                new LatLng(45.089371, -64.369356),
-                new LatLng(45.089231, -64.369313),
-                new LatLng(45.089197, -64.369501));
-
-        PolygonOptions barraxOptions = new PolygonOptions().add(
-                new LatLng(45.088780, -64.369442),
-                new LatLng(45.088814, -64.369286),
-                new LatLng(45.088712, -64.369248),
-                new LatLng(45.088748, -64.369042),
-                new LatLng(45.088831, -64.369063),
-                new LatLng(45.088865, -64.368902),
-                new LatLng(45.088626, -64.368816),
-                new LatLng(45.088535, -64.369358));
-
-        PolygonOptions hortonHallOptions = new PolygonOptions().add(
-                new LatLng(45.089012, -64.368634),
-                new LatLng(45.089046, -64.368446),
-                new LatLng(45.088690, -64.368333),
-                new LatLng(45.088656, -64.368515));
-
-        PolygonOptions biologyOptions = new PolygonOptions().add(
-                new LatLng(45.088391, -64.369175),
-                new LatLng(45.088448, -64.368901),
-                new LatLng(45.088103, -64.368783),
-                new LatLng(45.088054, -64.369051));
-
-        PolygonOptions pattersonOptions = new PolygonOptions().add(
-                new LatLng(45.088527, -64.368606),
-                new LatLng(45.088588, -64.368252),
-                new LatLng(45.088187, -64.368118),
-                new LatLng(45.088149, -64.368327),
-                new LatLng(45.088403, -64.368424),
-                new LatLng(45.088384, -64.368553));
-
-        PolygonOptions kcicOptions = new PolygonOptions().add(
+        PolygonOptions KCIOptions = new PolygonOptions().add(
                 new LatLng(45.087480, -64.369085),
                 new LatLng(45.087696, -64.367924),
                 new LatLng(45.087298, -64.367801),
@@ -163,17 +212,15 @@ public class MapsActivity extends Fragment {
                 new LatLng(45.087348, -64.368782),
                 new LatLng(45.087303, -64.369023));
 
-        PolygonOptions uhallOptions = new PolygonOptions().add(
-                new LatLng(45.089235, -64.367396),
-                new LatLng(45.089337, -64.366691),
-                new LatLng(45.089095, -64.366621),
-                new LatLng(45.089065, -64.366857),
-                new LatLng(45.089012, -64.366846),
-                new LatLng(45.088974, -64.367039),
-                new LatLng(45.089027, -64.367066),
-                new LatLng(45.088989, -64.367318));
+        PolygonOptions PATOptions = new PolygonOptions().add(
+                new LatLng(45.088527, -64.368606),
+                new LatLng(45.088588, -64.368252),
+                new LatLng(45.088187, -64.368118),
+                new LatLng(45.088149, -64.368327),
+                new LatLng(45.088403, -64.368424),
+                new LatLng(45.088384, -64.368553));
 
-        PolygonOptions rhodesHallOptions = new PolygonOptions().add(
+        PolygonOptions RHOOptions = new PolygonOptions().add(
                 new LatLng(45.088614, -64.367817),
                 new LatLng(45.088652, -64.367613),
                 new LatLng(45.088447, -64.367538),
@@ -183,60 +230,72 @@ public class MapsActivity extends Fragment {
                 new LatLng(45.088417, -64.367699),
                 new LatLng(45.088413, -64.367747));
 
-        PolygonOptions carnegieOptions = new PolygonOptions().add(
-                new LatLng(45.088264, -64.367545),
-                new LatLng(45.088321, -64.367153),
-                new LatLng(45.088101, -64.367083),
-                new LatLng(45.088090, -64.367147),
-                new LatLng(45.087935, -64.367109),
-                new LatLng(45.087886, -64.367366),
-                new LatLng(45.088060, -64.367420),
-                new LatLng(45.088056, -64.367474));
+        PolygonOptions UNHOptions = new PolygonOptions().add(
+                new LatLng(45.089235, -64.367396),
+                new LatLng(45.089337, -64.366691),
+                new LatLng(45.089095, -64.366621),
+                new LatLng(45.089065, -64.366857),
+                new LatLng(45.089012, -64.366846),
+                new LatLng(45.088974, -64.367039),
+                new LatLng(45.089027, -64.367066),
+                new LatLng(45.088989, -64.367318));
 
-        PolygonOptions emmersonOptions = new PolygonOptions().add(
-                new LatLng(45.088041, -64.366948),
-                new LatLng(45.088098, -64.366621),
-                new LatLng(45.087981, -64.366583),
-                new LatLng(45.087973, -64.366615),
-                new LatLng(45.087935, -64.366615),
-                new LatLng(45.087897, -64.366851),
-                new LatLng(45.087954, -64.366867),
-                new LatLng(45.087943, -64.366905));
+        PolygonOptions W17Options = new PolygonOptions().add(
+                new LatLng(45.089337, -64.369538),
+                new LatLng(45.089371, -64.369356),
+                new LatLng(45.089231, -64.369313),
+                new LatLng(45.089197, -64.369501));
 
-        PolygonOptions willetOptions = new PolygonOptions().add(
+        PolygonOptions WMHOptions = new PolygonOptions().add(
+                new LatLng(45.088780, -64.369442),
+                new LatLng(45.088814, -64.369286),
+                new LatLng(45.088712, -64.369248),
+                new LatLng(45.088748, -64.369042),
+                new LatLng(45.088831, -64.369063),
+                new LatLng(45.088865, -64.368902),
+                new LatLng(45.088626, -64.368816),
+                new LatLng(45.088535, -64.369358));
+
+        PolygonOptions WILOptions = new PolygonOptions().add(
                 new LatLng(45.087682, -64.367232),
                 new LatLng(45.087712, -64.367066),
                 new LatLng(45.087458, -64.366975),
                 new LatLng(45.087431, -64.367136));
 
-        PolygonOptions fountainOptions = new PolygonOptions().add(
-                new LatLng(45.087859, -64.366423),
-                new LatLng(45.087961, -64.365849),
-                new LatLng(45.087802, -64.365795),
-                new LatLng(45.087783, -64.365897),
-                new LatLng(45.087703, -64.365870),
-                new LatLng(45.087658, -64.365908),
-                new LatLng(45.087613, -64.366187),
-                new LatLng(45.087640, -64.366241),
-                new LatLng(45.087723, -64.366273),
-                new LatLng(45.087715, -64.366359));
-
-        buildingOptions.put("BAC", BACOptions);
-        buildingOptions.put("Tower", towerOptions);
-        buildingOptions.put("Elliot", elliotHallOptions);
+        /*buildingOptions.put("BAC", BACOptions);
+        buildingOptions.put("Biology", BIOOptions);
+        buildingOptions.put("Carnegie", CAROptions);
+        buildingOptions.put("Tower", CROOptions);
+        buildingOptions.put("Elliot", ELLOptions);
+        buildingOptions.put("Emmerson", EMMOptions);
+        buildingOptions.put("FountainCommons", FOUOptions);
+        buildingOptions.put("Horton", HOROptions);
         buildingOptions.put("HSH", HSHOptions);
-        buildingOptions.put("UniClub", uClubOptions);
-        buildingOptions.put("Barrax", barraxOptions);
-        buildingOptions.put("Horton", hortonHallOptions);
-        buildingOptions.put("Biology", biologyOptions);
-        buildingOptions.put("Patterson", pattersonOptions);
-        buildingOptions.put("KCIC", kcicOptions);
-        buildingOptions.put("UHall", uhallOptions);
-        buildingOptions.put("Rhodes", rhodesHallOptions);
-        buildingOptions.put("Carnegie", carnegieOptions);
-        buildingOptions.put("Emmerson", emmersonOptions);
-        buildingOptions.put("Willet", willetOptions);
-        buildingOptions.put("FountainCommons", fountainOptions);
+        buildingOptions.put("KCIC", KCIOptions);
+        buildingOptions.put("Patterson", PATOptions);
+        buildingOptions.put("Rhodes", RHOOptions);
+        buildingOptions.put("UHall", UNHOptions);
+        buildingOptions.put("UniClub", W17Options);
+        buildingOptions.put("Barrax", WMHOptions);
+        buildingOptions.put("Willet", WILOptions);*/
+
+        //Standardizing building codes across the app.
+        buildingOptions.put("BAC", BACOptions);
+        buildingOptions.put("BIO", BIOOptions);
+        buildingOptions.put("CAR", CAROptions);
+        buildingOptions.put("CRO", CROOptions);
+        buildingOptions.put("ELL", ELLOptions);
+        buildingOptions.put("EMM", EMMOptions);
+        buildingOptions.put("FOU", FOUOptions);
+        buildingOptions.put("HOR", HOROptions);
+        buildingOptions.put("HSH", HSHOptions);
+        buildingOptions.put("KCI", KCIOptions);
+        buildingOptions.put("PAT", PATOptions);
+        buildingOptions.put("RHO", RHOOptions);
+        buildingOptions.put("UNH", UNHOptions);
+        buildingOptions.put("W17", W17Options);
+        buildingOptions.put("WMH", WMHOptions);
+        buildingOptions.put("WIL", WILOptions);
 
         return buildingOptions;
     }
@@ -286,13 +345,14 @@ public class MapsActivity extends Fragment {
         */
         for (Map.Entry<String, PolygonOptions> entry : buildingOptions.entrySet()) {
             Polygon i = map.addPolygon(entry.getValue());
-            polyList.add(i);
+            polyList.put(entry.getKey(), i);
         }
 
         if (BUILDING_WINDOW_OPEN) {
             Log.i("Opening From Saved:", BUILDING_NAME_WINDOW_OPEN);
             addFragment(BUILDING_NAME_WINDOW_OPEN);
         }
+
 
         /*
          * Below are callback functions for Map clicks and camera changes
@@ -302,16 +362,16 @@ public class MapsActivity extends Fragment {
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
-                for (int pos = 0; pos < polyList.size(); pos++) {
+                for (Map.Entry<String, Polygon> code : polyList.entrySet()) {
                     //Checking if they clicked on a building
-                    if (PolyUtil.containsLocation(point, polyList.get(pos).getPoints(), false)) {
+                    if (PolyUtil.containsLocation(point, code.getValue().getPoints(), false)) {
                         //Checking if a building is open right now...
                         if (BUILDING_WINDOW_OPEN) {
                             removeFragment();
                         }
-                        Object keyArray[] = buildingOptions.keySet().toArray();
-                        BUILDING_NAME_WINDOW_OPEN = keyArray[pos].toString();
-                        addFragment(BUILDING_NAME_WINDOW_OPEN);
+
+                        BUILDING_NAME_WINDOW_OPEN = code.getKey();
+                        addFragment(code.getKey());
                         return;
                     }
                 }
@@ -372,7 +432,6 @@ public class MapsActivity extends Fragment {
                 }
                 lastCalled = currentTime;
             }
-
         });
     }
 
@@ -407,8 +466,8 @@ public class MapsActivity extends Fragment {
             Log.i("Removing:", BUILDING_NAME_WINDOW_OPEN);
             BUILDING_WINDOW_OPEN = false;
         }
-
     }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -420,3 +479,5 @@ public class MapsActivity extends Fragment {
         Log.i("onSaveInstanceState:", "All saved, goodbye.");
     }
 }
+
+
