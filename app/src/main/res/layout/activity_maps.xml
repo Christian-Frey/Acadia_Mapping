@@ -3,7 +3,6 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
     <fragment
         android:name="com.google.android.gms.maps.MapFragment"
         android:id="@+id/map"
@@ -11,13 +10,30 @@
         android:layout_height="match_parent"
         tools:layout="@layout/activity_main"/>
 
+    <AutoCompleteTextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:id="@+id/BuildingSearch"
+        android:layout_gravity="top"
+        style="@android:style/Theme.Holo.InputMethod"
+        android:alpha=".95"
+        android:hint="@string/building_search"
+        android:inputType="text"
+        android:background="#cfffffff"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="10dp"
+        android:completionThreshold="1" />
+
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="200dp"
         android:id="@+id/building_info_placeholder"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"/>
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_below="@+id/BuildingSearch"
+        android:layout_alignEnd="@+id/BuildingSearch">
+
+    </FrameLayout>
 
 </RelativeLayout>
 

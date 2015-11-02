@@ -46,5 +46,4 @@
             android:label="@string/title_activity_submit_feedback">
         </activity>
     </application>
-
 </manifest>

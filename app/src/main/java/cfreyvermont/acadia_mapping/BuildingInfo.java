@@ -1,64 +1,70 @@
 package cfreyvermont.acadia_mapping;
 
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.Toast;
 
+import java.lang.reflect.Field;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link BuildingInfo#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BuildingInfo extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_BUILDINGNAME = "Name";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String buildingName;
-    private String mParam2;
-
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment BuildingInfo.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static BuildingInfo newInstance(String param1, String param2) {
-        BuildingInfo fragment = new BuildingInfo();
-        Bundle args = new Bundle();
-        args.putString(ARG_BUILDINGNAME, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public BuildingInfo() {
-        // Required empty public constructor
-    }
+    private static final String ARG_BUILDINGNAME = "buildingName";
+    private Bundle bundle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            buildingName = getArguments().getString(ARG_BUILDINGNAME);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        bundle = getArguments();
     }
 
+    /*
+     * Our buildingInfo images were designed using the same colour scheme as the Google
+     * Map in order to complement the map, and provide a consistent user experience.
+     * We outlined the image of the building in order to define an edge between the
+     * building and the map. The black on tan text is easily readable on all screen sizes
+     * and the indentation of the text along the diagonal makes it clear which text should
+     * be read first. We also aimed for consistency with the buildingInfo pop-ups, so they
+     * all look the same, allowing for a user familiar with our app to quickly identify
+     * the data they are looking for.
+     *
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        /* Inflate the layout for this fragment */
         return inflater.inflate(R.layout.fragment_building_info, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        ImageView i = (ImageView) getView().findViewById(R.id.imageInfo);
+        if (bundle != null) {
+            Log.i("BuildingInfo->onCreate:", "have saved data");
+            String buildingName = bundle.getString(ARG_BUILDINGNAME);
+            Log.i("BUILDINGNAME:", buildingName);
+            int resourceID;
+
+            if (buildingName != null) {
+                try {
+                    Class draw = R.drawable.class;
+                    Field field = draw.getField(buildingName.toLowerCase());
+                    resourceID = field.getInt(null);
+                } catch (Exception e) {
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            "No infographic found for " + buildingName,
+                            Toast.LENGTH_SHORT).show();
+                    Log.e("Error:", "resource not found");
+                    return;
+                }
+                Drawable d = getResources().getDrawable(resourceID);
+                i.setImageDrawable(d);
+            }
+        }
     }
 }
